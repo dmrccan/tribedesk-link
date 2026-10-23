@@ -55,10 +55,14 @@
         var left = false;
         function closeTab() {
           window.close();
-          // Still open (not allowed here): say so instead.
+          // Still open: the browser doesn't let a page close a tab with more than one page in its history
+          // (Teams sends links through a Safe Links page first). Then a calm "done" instead.
           setTimeout(function () {
-            document.getElementById('title').textContent = 'TribeDesk is open';
-            document.getElementById('text').textContent = 'You can close this tab.';
+            document.getElementById('title').textContent = '✓ Opened in TribeDesk';
+            document.getElementById('text').textContent = 'You can close this tab (Ctrl+W).';
+            document.getElementById('open').className = 'btn ghost';
+            document.getElementById('open').textContent = 'Open again';
+            document.getElementById('tribe').style.display = 'none';
           }, 300);
         }
         window.addEventListener('blur', function () {
