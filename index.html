@@ -3,7 +3,8 @@
   TribeDesk link page. Teams (and other chats) only make http(s) links clickable, so TribeDesk copies
   https://<this page>/#<type>/<id>; this page opens tribedesk://<type>/<id> at once. The id is after the
   "#", which a browser never sends to the server. No data, no tracking, no other requests.
-  Published on GitHub Pages; the address is LINK_PAGE_URL in renderer/src/util/deepLink.js.
+  Published on GitHub Pages from the public repo github.com/dmrccan/tribedesk-link (keep the two the same);
+  the address is LINK_PAGE_URL in renderer/src/util/deepLink.js.
 -->
 <html lang="en">
   <head>
@@ -45,6 +46,33 @@
         document.title = 'Open the ' + m[1] + ' in TribeDesk';
         document.getElementById('open').href = app;
         document.getElementById('tribe').href = 'https://app.tribecrm.nl/entity/' + m[2].toLowerCase();
+
+        // Once TribeDesk has been asked to open, this tab has done its job and closes itself. Not while the
+        // browser asks "Open TribeDesk?" (closing the tab would close that question too): the question takes
+        // the focus, so the tab closes when the focus comes back (after "Open"), or when the person comes back
+        // to the tab later (TribeDesk took the focus). A browser only lets a page close a tab that holds
+        // nothing else (one page in its history), as when the link was clicked in Teams or Outlook.
+        var left = false;
+        function closeTab() {
+          window.close();
+          // Still open (not allowed here): say so instead.
+          setTimeout(function () {
+            document.getElementById('title').textContent = 'TribeDesk is open';
+            document.getElementById('text').textContent = 'You can close this tab.';
+          }, 300);
+        }
+        window.addEventListener('blur', function () {
+          left = true;
+        });
+        window.addEventListener('focus', function () {
+          if (left) setTimeout(closeTab, 300);
+        });
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible' && left) setTimeout(closeTab, 300);
+        });
+        document.getElementById('open').addEventListener('click', function () {
+          left = false;
+        });
         location.href = app;
       })();
     </script>
